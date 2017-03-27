@@ -18,3 +18,7 @@ hs_err_pid*
 # Hide Build Output #
 /bin/
 /build/
+
+src/main/resources/wwom.properties
+
+src/main/resources/Surfspots.csv

@@ -25,7 +25,16 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+	//include local jar dependencies
+    compile fileTree(dir: 'libs', include: '*.jar')
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile ("com.amazonaws:aws-java-sdk-dynamodb")
+    compile 'com.github.derjust:spring-data-dynamodb:4.4.1'
+    compile 'com.opencsv:opencsv:3.9'
+    
+    //runtime dependencies from WWOM Client
+    runtime group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+	
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
