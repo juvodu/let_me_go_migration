@@ -32,7 +32,8 @@ public class MatchService {
     		match.setSpot(spot);
     		
     		try {
-        		Forecast forecast = client.getForecast(spot.getLatitude() + ", " + spot.getLongitude());
+    			//TODO: fix this...api threshold reached to fast
+        		Forecast forecast = client.getForecast(spot.getPosition().getLatitude() + "," + spot.getPosition().getLongitude());
     	    	match.setForecast(forecast);
     	    	matches.add(match);
     		} catch (WWOMClientException e) {

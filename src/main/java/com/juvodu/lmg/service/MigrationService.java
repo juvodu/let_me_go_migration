@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.javadocmd.simplelatlng.LatLng;
 import com.juvodu.lmg.model.Spot;
 import com.juvodu.lmg.repository.SpotRepository;
 import com.opencsv.CSVReader;
@@ -21,14 +23,32 @@ public class MigrationService {
 	@Autowired
 	private SpotRepository spotRepository;
 	
+	public void migrate(int changelog){
+	
+		log.info("Migrate to changelog version " + changelog);
+		switch(changelog){
+	  		case 0:
+	  			createGeoSpotTable();
+	  			importSpotsFromCsv();
+	  			break;
+	  		default:
+	  			log.warn("No migration script for changelog " + changelog);
+	  			break;
+		}
+	}
+	
+	private void createGeoSpotTable(){
+		
+	}
+	
 	/**
 	 * Import Spots from CSV to Database
 	 * @return
 	 */
-	public int importSpotsFromCsv(){
+	int importSpotsFromCsv(){
 		
 		int spotsAdded = 0;
-		 String csvFileName = "Surfspots.csv";
+		 String csvFileName = "Surfspots2.csv";
 	        //Get file from resources folder
 	    	ClassLoader classLoader = getClass().getClassLoader();
 	    	File csvFile = new File(classLoader.getResource(csvFileName).getFile());
@@ -37,16 +57,29 @@ public class MigrationService {
 	        try(CSVReader reader = new CSVReader(new FileReader(csvFile), ';')) {
 	            String[] line;
 	            
+	            //skip header line
+	            reader.readNext();
+	            
 	            while ((line = reader.readNext()) != null) {
 	            	
 	            	Spot spot = new Spot();
+	            	String latitudeStr = line[6];
+	            	String longitudeStr = line[7];
+	            	double latitude = 0;
+	            	double longitude = 0;
+	            	
+	            	if(!StringUtils.isBlank(latitudeStr) && !StringUtils.isBlank(longitudeStr)){
+	            		try{
+	            			latitude = Double.valueOf(latitudeStr);
+	            			longitude = Double.valueOf(longitudeStr);
+	            		}catch(NumberFormatException e){}
+	            	}
+	            	
 	            	spot.setName(line[0]);
 	            	spot.setContinent(line[1]);
 	            	spot.setCountry(line[2]);
 	            	spot.setCountry(line[2]);
-	            	spot.setLatitude(line[6]);
-	            	spot.setLongitude(line[7]);
-	            	
+	            	spot.setPosition(new LatLng(latitude, longitude));
 	            	String walk = line[9].replace("&amp;lt;", "<").replace("&gt;", ">");
 	            	spot.setWalk(walk);
 	            	spot.setWaveQuality(line[13]);

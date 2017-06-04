@@ -22,3 +22,5 @@ hs_err_pid*
 src/main/resources/wwom.properties
 
 src/main/resources/Surfspots.csv
+
+src/main/resources/Surfspots2.csv

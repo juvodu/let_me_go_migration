@@ -8,6 +8,8 @@ import org.springframework.util.StringUtils;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
@@ -18,18 +20,27 @@ public class DynamoDBConfig {
  
     @Value("${amazon.dynamodb.endpoint}")
     private String amazonDynamoDBEndpoint;
+    
+    @Value("${amazon.dynamodb.region}")
+    private String amazonDynamoDBRegion;
  
     @Value("${amazon.aws.accesskey}")
     private String amazonAWSAccessKey;
  
     @Value("${amazon.aws.secretkey}")
     private String amazonAWSSecretKey;
+    
+    
  
     @Bean
     public AmazonDynamoDB amazonDynamoDB() {
+    	
         AmazonDynamoDB amazonDynamoDB 
           = new AmazonDynamoDBClient(amazonAWSCredentials());
-         
+        
+        // set the region of dynamo DB
+        amazonDynamoDB.setRegion(Region.getRegion(Regions.fromName(amazonDynamoDBRegion)));
+        
         if (!StringUtils.isEmpty(amazonDynamoDBEndpoint)) {
             amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
         }
@@ -39,6 +50,7 @@ public class DynamoDBConfig {
  
     @Bean
     public AWSCredentials amazonAWSCredentials() {
+    	
         return new BasicAWSCredentials(
           amazonAWSAccessKey, amazonAWSSecretKey);
     }

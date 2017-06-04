@@ -16,13 +16,12 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
-import com.javadocmd.simplelatlng.LatLng;
 import com.juvodu.lmg.App;
-import com.juvodu.lmg.model.Spot;
+import com.juvodu.lmg.model.ChangeLog;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = App.class)
-public class SpotRepositoryIntegrationTest {
+public class ChangeLogRepositoryIntegrationTest {
 	
 	private DynamoDBMapper dynamoDBMapper;
 	
@@ -30,28 +29,26 @@ public class SpotRepositoryIntegrationTest {
     private AmazonDynamoDB amazonDynamoDB;
     
     @Autowired
-    SpotRepository spotRepository;
+    ChangeLogRepository changeLogRepository;
     
     @Before
     public void setup() throws Exception {
         dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
         
-        CreateTableRequest createTableRequest = dynamoDBMapper.generateCreateTableRequest(Spot.class);
-        ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput(1L, 1L);
-        createTableRequest.setProvisionedThroughput(provisionedThroughput);
+        CreateTableRequest createTableRequest = dynamoDBMapper.generateCreateTableRequest(ChangeLog.class);
+        createTableRequest.setProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
         TableUtils.createTableIfNotExists(amazonDynamoDB, createTableRequest);
                  
-        spotRepository.deleteAll();
+        changeLogRepository.deleteAll();
     }
     
     @Test
-    public void whenRetrieveAllSpotAfterStoringThenResultNotEmpty() {
+    public void test(){
     	
-        Spot spot = new Spot();
-        spot.setPosition(new LatLng(1, 1));
-        spotRepository.save(spot);
- 
-        List<Spot> result = (List<Spot>) spotRepository.findAll();
-        assertTrue("Could not retrieve Spot", result.size() > 0);
+    	ChangeLog changeLog = new ChangeLog(1);
+    	changeLogRepository.save(changeLog);
+    	
+    	List<ChangeLog> changeLogs = (List<ChangeLog>)changeLogRepository.findAll();
+    	assertTrue(changeLogs.size() >0);
     }
 }
