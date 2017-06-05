@@ -1,5 +1,8 @@
 package com.juvodu.lmg.model;
 
+import com.juvodu.lmg.model.converter.ContinentTypeConverter;
+import com.juvodu.lmg.model.converter.CountryTypeConverter;
+import com.juvodu.lmg.model.converter.LatLngTypeConverter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
@@ -25,12 +28,14 @@ public class Spot{
     
     @DynamoDBAttribute
     private String description;
-    
-	@DynamoDBAttribute
-    private String continent;
-    
-    @DynamoDBAttribute
-    private String country;
+
+	@DynamoDBTypeConverted(converter = ContinentTypeConverter.class)
+	@DynamoDBAttribute(attributeName = "continent")
+    private Continent continent;
+
+	@DynamoDBTypeConverted(converter = CountryTypeConverter.class)
+	@DynamoDBAttribute(attributeName = "country")
+    private Country country;
     
     @DynamoDBAttribute
     private String walk;
@@ -89,39 +94,34 @@ public class Spot{
 	public void setId(String id) {
 		this.id = id;
 	}
-	
     public LatLng getPosition() {
 		return position;
 	}
 	public void setPosition(LatLng position) {
 		this.position = position;
 	}
-	
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
 	}
-	
 	public String getDescription() {
 		return description;
 	}
-	
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
-	public String getContinent() {
+	public Continent getContinent() {
 		return continent;
 	}
-	public void setContinent(String continent) {
+	public void setContinent(Continent continent) {
 		this.continent = continent;
 	}
-	public String getCountry() {
+	public Country getCountry() {
 		return country;
 	}
-	public void setCountry(String country) {
+	public void setCountry(Country country) {
 		this.country = country;
 	}
 	public String getWalk() {

@@ -1,7 +1,8 @@
-package com.juvodu.lmg.model;
+package com.juvodu.lmg.model.converter;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
 import com.javadocmd.simplelatlng.LatLng;
+import org.apache.commons.lang3.StringUtils;
 
 public class LatLngTypeConverter implements DynamoDBTypeConverter<String, LatLng> {
 
@@ -25,7 +26,7 @@ public class LatLngTypeConverter implements DynamoDBTypeConverter<String, LatLng
 		double latitude = 0;
 		double longitude = 0;
         try {
-            if (s != null && s.length() != 0) {
+            if (StringUtils.isNotBlank(s)) {
                 String[] data = s.split(";");
                 latitude = Double.valueOf(data[0].trim());
                 longitude = Double.valueOf(data[1].trim());
