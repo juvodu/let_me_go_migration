@@ -2,6 +2,7 @@
 .project
 .settings
 .gradle/
+.idea/
 *.class
 
 # Mobile Tools for Java (J2ME)
@@ -25,3 +26,6 @@ src/main/resources/wwom.properties
 src/main/resources/Surfspots.csv
 
 src/main/resources/Surfspots2.csv
+
+
+.idea/libraries/Gradle__ch_qos_logback_logback_classic_1_1_11.xml

@@ -3,51 +3,41 @@ package com.juvodu.lmg.service;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
 import com.juvodu.lmg.model.Continent;
 import com.juvodu.lmg.model.Country;
+import com.juvodu.lmg.model.Position;
+import com.juvodu.lmg.util.Constants;
 import com.juvodu.lmg.util.CountryUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import com.javadocmd.simplelatlng.LatLng;
 import com.juvodu.lmg.model.Spot;
-import com.juvodu.lmg.repository.SpotRepository;
 import com.opencsv.CSVReader;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class MigrationService {
 	
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	private List<String> countries;
-
-	@Autowired
-	private SpotRepository spotRepository;
-	
-	public void migrate(int changelog){
-	
-		log.info("Migrate to changelog version " + changelog);
-		switch(changelog){
-	  		case 0:
-	  			importSpotsFromCsv();
-	  			break;
-	  		default:
-	  			log.warn("No migration script for changelog " + changelog);
-	  			break;
-		}
-	}
+	private final RestTemplate restTemplate = new RestTemplate();
 	
 	/**
-	 * Import Spots from CSV to Database
+	 * Import Spots from CSV to AWS
 	 * @return
 	 */
-	int importSpotsFromCsv(){
+	public void importSpotsFromCsv(){
 		
 		int spotsAdded = 0;
         final String csvFileName = "Surfspots.csv";
@@ -83,14 +73,15 @@ public class MigrationService {
                 String continentName = line[1].replace("_", "");
                 String countryName = line[2].replace("_", " ");
                 Country country = CountryUtil.getCountryForName(locales, countryName);
-                if(country == null){
+                Continent continent = Continent.valueOf(continentName);
+                if(country == null || continent == null){
                     continue;
                 }
 
                 spot.setName(name);
-                spot.setContinent(Continent.valueOf(continentName));
+                spot.setContinent(continent.getCode());
                 spot.setCountry(country);
-                spot.setPosition(new LatLng(latitude, longitude));
+                spot.setPosition(new Position(latitude, longitude));
                 String walk = line[9].replace("&amp;lt;", "<").replace("&gt;", ">");
                 spot.setWalk(walk);
                 spot.setWaveQuality(line[13]);
@@ -110,14 +101,18 @@ public class MigrationService {
                 spot.setWeekCrowd(line[27]);
                 spot.setWeekEndCrowd(line[28]);
 
-                spot = spotRepository.save(spot);
                 spotsAdded++;
+
+                MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+                headers.add("x-api-key", Constants.API_KEY);
+                headers.add("Content-Type", "application/json");
+                HttpEntity<Spot> request = new HttpEntity<>(spot, headers);
+                restTemplate.postForLocation(Constants.API_ENDPOINT, request);
                 log.debug(spot.toString());
             }
             log.info("Migrated " + spotsAdded + " Spots from CSV to Database.");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return spotsAdded;
 	}
 }
